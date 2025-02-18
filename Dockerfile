@@ -1,7 +1,7 @@
-# Usa uma versão mínima do Node.js
+# Usa a imagem do Node.js baseada no Alpine Linux
 FROM node:18-alpine
 
-# Instala os pacotes necessários para Puppeteer e Chromium
+# Instala pacotes necessários
 RUN apk add --no-cache \
     chromium \
     nss \
@@ -11,27 +11,32 @@ RUN apk add --no-cache \
     ttf-freefont \
     vips-dev \
     ffmpeg \
-    su-exec  # Adiciona utilitário para rodar como usuário não-root
+    su-exec  # Adiciona ferramenta para mudar permissões
 
-# Define as variáveis de ambiente do Puppeteer
+# Define variáveis para o Puppeteer
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
-# Muda para um diretório de trabalho no container
+# Define diretório de trabalho no container
 WORKDIR /app
 
-# Copia os arquivos necessários antes da instalação das dependências
+# **Cria a pasta "tokens" e define permissões**
+RUN mkdir -p /app/tokens && chown -R node:node /app
+
+# Copia os arquivos necessários antes da instalação
 COPY package*.json ./
 
-# Instala as dependências sem instalar pacotes desnecessários
+# Instala dependências
 RUN npm install --production --pure-lockfile
 
-# Copia o restante do código para o container
+# Copia o restante do código
 COPY . .
 
-# Muda para um usuário sem privilégios administrativos
+# Garante que o usuário "node" tenha acesso total à pasta
+RUN chmod -R 777 /app/tokens
+
+# Muda para usuário sem privilégios administrativos
 USER node
 
-# Define o comando padrão ao iniciar o container
+# Define comando padrão ao iniciar o container
 CMD ["npm", "start"]
-

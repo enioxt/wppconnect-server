@@ -8,6 +8,17 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 8080;
 
+const fs = require('fs');
+const path = require('path');
+
+const tokensDir = path.join(__dirname, 'tokens');
+
+// Verifica se a pasta "tokens" existe, se não, cria
+if (!fs.existsSync(tokensDir)) {
+    fs.mkdirSync(tokensDir, { recursive: true });
+    console.log('Pasta "tokens" criada com sucesso!');
+}
+
 let qrCode = '';
 let sessionStatus = 'disconnected';
 
