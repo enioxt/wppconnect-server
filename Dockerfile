@@ -20,7 +20,7 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 # Define diretório de trabalho no container
 WORKDIR /app
 
-# **Remove a pasta de sessão e cria diretórios necessários**
+# **Remove sessões antigas antes de iniciar**
 RUN rm -rf /app/tokens/autlog-session && mkdir -p /app/tokens && chmod -R 777 /app/tokens && chown -R node:node /app/tokens
 
 # Copia os arquivos do projeto antes da instalação
