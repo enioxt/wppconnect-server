@@ -1,6 +1,7 @@
+# Usa uma versão mínima do Node.js
 FROM node:18-alpine
 
-# Instala pacotes necessários para o Puppeteer e Sharp
+# Instala os pacotes necessários para Puppeteer e Chromium
 RUN apk add --no-cache \
     chromium \
     nss \
@@ -9,21 +10,28 @@ RUN apk add --no-cache \
     ca-certificates \
     ttf-freefont \
     vips-dev \
-    fftw-dev
+    ffmpeg \
+    su-exec  # Adiciona utilitário para rodar como usuário não-root
 
-# Define variáveis para o Puppeteer
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+# Define as variáveis de ambiente do Puppeteer
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
+# Muda para um diretório de trabalho no container
 WORKDIR /app
 
-# Copia os arquivos de dependência primeiro
+# Copia os arquivos necessários antes da instalação das dependências
 COPY package*.json ./
 
-# Instala as dependências
+# Instala as dependências sem instalar pacotes desnecessários
 RUN npm install --production --pure-lockfile
 
-# Copia o restante do código
+# Copia o restante do código para o container
 COPY . .
 
+# Muda para um usuário sem privilégios administrativos
+USER node
+
+# Define o comando padrão ao iniciar o container
 CMD ["npm", "start"]
+
