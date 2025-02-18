@@ -1,7 +1,7 @@
-# Usa Node.js baseado no Alpine Linux
+# Usa Node.js baseado no Alpine para menor tamanho
 FROM node:18-alpine
 
-# Instala pacotes necessários
+# Instala pacotes necessários para Puppeteer e manipulação de imagens
 RUN apk add --no-cache \
     chromium \
     nss \
@@ -20,10 +20,7 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 # Define diretório de trabalho no container
 WORKDIR /app
 
-# **Remove sessões antigas antes de iniciar**
-RUN rm -rf /app/tokens/autlog-session && mkdir -p /app/tokens && chmod -R 777 /app/tokens && chown -R node:node /app/tokens
-
-# Copia os arquivos do projeto antes da instalação
+# Copia arquivos do projeto para o container
 COPY package*.json ./
 
 # Instala dependências
@@ -32,8 +29,8 @@ RUN npm install --production --pure-lockfile
 # Copia o restante do código
 COPY . .
 
-# **Garante permissões da pasta de trabalho**
-RUN chmod -R 777 /app
+# Permissões para diretórios temporários
+RUN mkdir -p /app/temp /app/tokens && chmod -R 777 /app/temp /app/tokens
 
 # Muda para usuário sem privilégios administrativos
 USER node
