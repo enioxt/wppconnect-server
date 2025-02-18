@@ -20,8 +20,8 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 # Define diretório de trabalho no container
 WORKDIR /app
 
-# **Cria a pasta "tokens" e garante permissões**
-RUN mkdir -p /app/src/tokens && chmod -R 777 /app/src/tokens && chown -R node:node /app/src/tokens
+# **Remove a pasta de sessão e cria diretórios necessários**
+RUN rm -rf /app/tokens/autlog-session && mkdir -p /app/tokens && chmod -R 777 /app/tokens && chown -R node:node /app/tokens
 
 # Copia os arquivos do projeto antes da instalação
 COPY package*.json ./
@@ -32,7 +32,7 @@ RUN npm install --production --pure-lockfile
 # Copia o restante do código
 COPY . .
 
-# Garante permissões da pasta de trabalho inteira
+# **Garante permissões da pasta de trabalho**
 RUN chmod -R 777 /app
 
 # Muda para usuário sem privilégios administrativos

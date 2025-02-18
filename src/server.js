@@ -1,6 +1,8 @@
 const express = require('express');
 const { create } = require('@wppconnect-team/wppconnect');
 const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 app.use(cors());
@@ -8,12 +10,9 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 8080;
 
-const fs = require('fs');
-const path = require('path');
-
 const tokensDir = path.join(__dirname, 'tokens');
 
-// **Verifica se a pasta já existe e evita erro**
+// **Garante que a pasta "tokens" existe e tem permissões corretas**
 try {
     if (!fs.existsSync(tokensDir)) {
         fs.mkdirSync(tokensDir, { recursive: true });
@@ -58,7 +57,7 @@ async function startServer() {
     console.log('Iniciando WhatsApp bot...');
 
     const client = await create({
-      session: 'autlog-session',
+      session: 'autlog-session-' + Date.now(), // Garante que uma nova sessão seja criada
       puppeteer: {
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium',
         headless: true,
@@ -77,6 +76,12 @@ async function startServer() {
       statusFind: (status) => {
         sessionStatus = status;
         console.log('Status da sessão:', status);
+
+        // **Força reconexão se estiver desconectado**
+        if (status === 'desconnected' || status === 'qrReadFail') {
+          console.log('Sessão desconectada! Reiniciando...');
+          startServer();
+        }
       }
     });
 
