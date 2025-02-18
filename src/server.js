@@ -13,10 +13,16 @@ const path = require('path');
 
 const tokensDir = path.join(__dirname, 'tokens');
 
-// Verifica se a pasta "tokens" existe, se não, cria
-if (!fs.existsSync(tokensDir)) {
-    fs.mkdirSync(tokensDir, { recursive: true });
-    console.log('Pasta "tokens" criada com sucesso!');
+// **Verifica se a pasta já existe e evita erro**
+try {
+    if (!fs.existsSync(tokensDir)) {
+        fs.mkdirSync(tokensDir, { recursive: true });
+        console.log('Pasta "tokens" criada com sucesso!');
+    } else {
+        console.log('Pasta "tokens" já existe.');
+    }
+} catch (error) {
+    console.error('Erro ao criar pasta tokens:', error.message);
 }
 
 let qrCode = '';
